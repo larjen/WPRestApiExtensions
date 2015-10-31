@@ -3,9 +3,9 @@
 /*
   Plugin Name: WPRestApiExtensions
   Plugin URI: https://github.com/larjen/WPRestApiExtensions
-  Description: Extends the WP-REST API to get additional fields from responses.
+  Description: Extends the WP-REST API to get additional fiels from responses.
   Author: Lars Jensen
-  Version: 1.0.0
+  Version: 1.0.1
   Author URI: http://exenova.dk/
  */
 
@@ -72,23 +72,40 @@ class WPRestApiExtensions {
 
         // since the messages has been shown, purge them.
         update_option(self::$plugin_salt . "_MESSAGES", []);
-
     }
 
     static function extend_with_post_data() {
-        register_api_field( 'post',
-            'tags',
-            array(
-                'get_callback'    => 'WPRestApiExtensions::get_tags',
-                'update_callback' => null,
-                'schema'          => null,
-            )
+        register_api_field('post', 'tags', array(
+            'get_callback' => 'WPRestApiExtensions::get_tags',
+            'update_callback' => null,
+            'schema' => null,
+                )
+        );
+        register_api_field('post', 'categories', array(
+            'get_callback' => 'WPRestApiExtensions::get_category',
+            'update_callback' => null,
+            'schema' => null,
+                )
         );
     }
 
-    static function get_tags( $object, $field_name, $request ) {
-        return wp_get_post_tags( $object[ 'id' ]); 
+    static function get_tags($object, $field_name, $request) {
+        return wp_get_post_tags($object['id']);
     }
+
+    static function get_category($object, $field_name, $request) {
+
+        $catIds = wp_get_post_categories($object['id']);
+
+        $cats = array();
+
+        foreach ($catIds as $id) {
+            array_push($cats, get_category($id));
+        }
+
+        return $cats;
+    }
+
 }
 
 // register activation and deactivation
@@ -99,4 +116,4 @@ register_deactivation_hook(__FILE__, 'WPRestApiExtensions::deactivation');
 add_action('admin_menu', 'WPRestApiExtensions::plugin_menu');
 
 // add for rest api
-add_action( 'rest_api_init', 'WPRestApiExtensions::extend_with_post_data' );
+add_action('rest_api_init', 'WPRestApiExtensions::extend_with_post_data');
