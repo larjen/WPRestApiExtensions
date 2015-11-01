@@ -5,7 +5,7 @@
   Plugin URI: https://github.com/larjen/WPRestApiExtensions
   Description: Extends the WP-REST API to get additional fiels from responses.
   Author: Lars Jensen
-  Version: 1.0.1
+  Version: 1.0.2
   Author URI: http://exenova.dk/
  */
 
@@ -105,6 +105,32 @@ class WPRestApiExtensions {
 
         return $cats;
     }
+    
+    /*
+     * Retrieve tagsfrom name parameter
+     * 
+     */
+    
+    static function get_filtered_tags( $WP_REST_Request_arg ) {
+        
+        self::add_message($WP_REST_Request_arg["name"] );
+        
+        //search object
+        $searchObj = array(
+            "name"=>$WP_REST_Request_arg["name"],
+            "number"=>1
+        );
+
+        
+        $tags = get_tags($searchObj);
+        
+        if ( empty( $tags ) ) {
+            return new WP_Error( 'WPRestApiExtensions', 'No such tag.', array( 'status' => 404 ) );
+        }
+
+        return $tags;
+    }
+
 
 }
 
@@ -117,3 +143,10 @@ add_action('admin_menu', 'WPRestApiExtensions::plugin_menu');
 
 // add for rest api
 add_action('rest_api_init', 'WPRestApiExtensions::extend_with_post_data');
+add_action('rest_api_init', function () {
+    register_rest_route( 'wprestapiextensions/v1', '/tags', array(
+        'methods' => 'GET',
+        'callback' => 'WPRestApiExtensions::get_filtered_tags',
+    ) );
+} );
+
