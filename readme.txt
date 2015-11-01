@@ -29,6 +29,9 @@ Yes.
 
 == Changelog ==
 
+= 1.0.1 =
+* Added categories to response for posts.
+
 = 1.0.0 =
 * Uploaded plugin.
 
