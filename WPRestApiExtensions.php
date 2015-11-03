@@ -5,7 +5,7 @@
   Plugin URI: https://github.com/larjen/WPRestApiExtensions
   Description: Extends the WP-REST API to get additional fiels from responses.
   Author: Lars Jensen
-  Version: 1.0.2
+  Version: 1.0.3
   Author URI: http://exenova.dk/
  */
 
@@ -120,12 +120,28 @@ class WPRestApiExtensions {
             "name"=>$WP_REST_Request_arg["name"],
             "number"=>1
         );
-
         
         $tags = get_tags($searchObj);
         
         if ( empty( $tags ) ) {
-            return new WP_Error( 'WPRestApiExtensions', 'No such tag.', array( 'status' => 404 ) );
+            
+            // if there is a space in the requested name - try replacing them with '-'
+            // to see if that gives a result
+            
+            $newSearchTerm = str_replace(' ','-',$WP_REST_Request_arg["name"]);
+            
+            //search object
+            $searchObj = array(
+                "name"=>$newSearchTerm,
+                "number"=>1
+            );
+
+            $tags = get_tags($searchObj);
+
+            if ( empty( $tags ) ) {
+            
+                return new WP_Error( 'WPRestApiExtensions', 'No such tag.', array( 'status' => 404 ) );
+            }
         }
 
         return $tags;

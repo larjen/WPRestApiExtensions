@@ -29,6 +29,10 @@ Yes.
 
 == Changelog ==
 
+= 1.0.3 =
+
+* If you request a tag with spaces in the name, before failing it will also try searching for a tag where spaces has been replaces with '-' tags.
+
 = 1.0.2 =
 * Added endpoint so you can get a tag.
 
