@@ -173,18 +173,24 @@ class WPRestApiExtensions {
     
     static function tag($WP_REST_Request_arg) {
 
-        self::add_message($WP_REST_Request_arg["name"]);
+        self::add_message($WP_REST_Request_arg["tag_name"]);
         
-        if (empty($WP_REST_Request_arg["name"])) {
+        if (empty($WP_REST_Request_arg["tag_name"])) {
             return new WP_Error('WPRestApiExtensions', 'No such tag.', array('status' => 404));
         }
 
+        $response = [];
+        $response["data"] = [];
+        $response["status_code"] = 200;
+        $response["uri"] = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s:" : ":"). "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+
+        
         // add the filter
         add_filter('get_tags', 'WPRestApiExtensions::filter_tag', 10, 1);
 
         //search object
         $searchObj = array(
-            "name" => $WP_REST_Request_arg["name"],
+            "name" => $WP_REST_Request_arg["tag_name"],
             "number" => 1
         );
 
@@ -198,7 +204,7 @@ class WPRestApiExtensions {
             // if there is a space in the requested name - try replacing them with '-'
             // to see if that gives a result
 
-            $newSearchTerm = str_replace(' ', '-', $WP_REST_Request_arg["name"]);
+            $newSearchTerm = str_replace(' ', '-', $WP_REST_Request_arg["tag_name"]);
 
             //search object
             $searchObj = array(
@@ -211,14 +217,15 @@ class WPRestApiExtensions {
             $tag = get_tags($searchObj);
 
             if (empty($tag)) {
-
                 return new WP_Error('WPRestApiExtensions', 'No such tag.', array('status' => 404));
             }
         }
         
         // remove the filter
         remove_filter('get_tags', 'WPRestApiExtensions::filter_tag');
-        return $tag;
+        array_push($response["data"],$tag[0]);
+        
+        return $response;
     }
     
     static function posts($WP_REST_Request_arg) {
@@ -228,12 +235,12 @@ class WPRestApiExtensions {
         // build the WP_Query query
         $args = array();
 
-        if (isset($WP_REST_Request_arg["posts_per_page"])){
-            $args['posts_per_page'] = $WP_REST_Request_arg["posts_per_page"];
+        if (isset($WP_REST_Request_arg["per_page"])){
+            $args['posts_per_page'] = $WP_REST_Request_arg["per_page"];
         }
         
-        if (isset($WP_REST_Request_arg["paged"])){
-            $args['paged'] = $WP_REST_Request_arg["paged"];
+        if (isset($WP_REST_Request_arg["current_page"])){
+            $args['paged'] = $WP_REST_Request_arg["current_page"];
         }
         
         if (isset($WP_REST_Request_arg["tag"])){
@@ -246,7 +253,12 @@ class WPRestApiExtensions {
         $response = [];
         $response['total']=$the_query->found_posts;
         $response['total_pages']=$the_query->max_num_pages;
-        $response["posts"] = [];
+        $response['per_page']=$WP_REST_Request_arg["per_page"];
+        $response["status_code"] = 200;
+        $response["current_page"] = $WP_REST_Request_arg["current_page"];
+        $response["data"] = [];
+
+        $response["uri"] = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s:" : ":"). "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
         foreach($the_query->get_posts() as $post){
             
@@ -264,7 +276,7 @@ class WPRestApiExtensions {
                 array_push($returnPost["categories"],self::filter_category($cat));
             }
 
-            array_push($response["posts"],$returnPost);
+            array_push($response["data"],$returnPost);
 
         }
         

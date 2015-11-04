@@ -32,6 +32,7 @@ Yes.
 = 1.0.4 =
 
 * Added new endpoints for posts.
+* Wrapping responses
 
 = 1.0.3 =
 
