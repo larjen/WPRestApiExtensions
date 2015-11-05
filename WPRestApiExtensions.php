@@ -132,7 +132,6 @@ class WPRestApiExtensions {
         $response["status_code"] = 200;
         $response["uri"] = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s:" : ":") . "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
-
         // add the filter
         add_filter('get_tags', 'WPRestApiExtensions::filter_tag', 10, 1);
 
@@ -156,8 +155,6 @@ class WPRestApiExtensions {
                 "name" => $newSearchTerm,
                 "number" => 1
             );
-
-
 
             $tag = get_tags($searchObj);
 
@@ -255,10 +252,7 @@ class WPRestApiExtensions {
         $response['per_page'] = $WP_REST_Request_arg["per_page"];
         $response["status_code"] = 200;
         $response["page"] = $WP_REST_Request_arg["page"];
-
-
         $response["pagination"] = self::get_pagination($response);
-
 
         /* Restore original Post Data */
         wp_reset_postdata();
@@ -269,7 +263,6 @@ class WPRestApiExtensions {
 
         return $response;
     }
-
 }
 
 // register activation and deactivation
@@ -292,4 +285,3 @@ add_action('rest_api_init', function () {
         'callback' => 'WPRestApiExtensions::posts',
     ));
 });
-
