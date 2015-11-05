@@ -8,11 +8,11 @@ Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Extends the WP-REST API to get additional fiels from responses.
+Extends the WP-REST API with custom read only endpoints.
 
 == Description ==
 
-Extends the WP-REST API to get additional fiels from responses.
+Extends the WP-REST API with custom read only endpoints.
 
 == Installation ==
 
@@ -28,6 +28,11 @@ Yes.
 == Screenshots ==
 
 == Changelog ==
+
+= 1.0.5 =
+
+* Added search capability.
+* Added simple pagination.
 
 = 1.0.4 =
 

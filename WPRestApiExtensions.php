@@ -3,9 +3,9 @@
 /*
   Plugin Name: WPRestApiExtensions
   Plugin URI: https://github.com/larjen/WPRestApiExtensions
-  Description: Extends the WP-REST API to get additional fiels from responses.
+  Description: Extends the WP-REST API with custom read only endpoints.
   Author: Lars Jensen
-  Version: 1.0.4
+  Version: 1.0.5
   Author URI: http://exenova.dk/
  */
 
@@ -74,41 +74,8 @@ class WPRestApiExtensions {
         update_option(self::$plugin_salt . "_MESSAGES", []);
     }
 
-    static function extend_with_post_data() {
-        register_api_field('post', 'tags', array(
-            'get_callback' => 'WPRestApiExtensions::get_tags',
-            'update_callback' => null,
-            'schema' => null,
-                )
-        );
-        register_api_field('post', 'categories', array(
-            'get_callback' => 'WPRestApiExtensions::get_category',
-            'update_callback' => null,
-            'schema' => null,
-                )
-        );
-    }
-
-    static function get_tags($object, $field_name, $request) {
-        return wp_get_post_tags($object['id']);
-    }
-
-    static function get_category($object, $field_name, $request) {
-
-        $catIds = wp_get_post_categories($object['id']);
-
-        $cats = array();
-
-        foreach ($catIds as $id) {
-            array_push($cats, get_category($id));
-        }
-
-        return $cats;
-    }
-
     /*
      * Retrieve tagsfrom name parameter
-     * 
      */
 
     static function filter_tag($tags) {
@@ -122,31 +89,12 @@ class WPRestApiExtensions {
                 "slug" => $tag->slug,
                 "term_id" => $tag->term_id,
                 "name" => $tag->name
-                )
+                    )
             );
         }
         return $returnTags;
     }
 
-    /*
-     * cat_ID: 1266
-        cat_name: "Tweet"
-        category_count: 106
-        category_description: "Tweets imported from twotter"
-        category_nicename: "tweet"
-        category_parent: 0
-        count: 106
-        description: "Tweets imported from twotter"
-        filter: "raw"
-        name: "Tweet"
-        object_id: 3280
-        parent: 0
-        slug: "tweet"
-        taxonomy: "category"
-        term_group: 0
-        term_id: 1266
-        term_taxonomy_id: 1266
-     */
     static function filter_category($category) {
         //var_dump($category);
 
@@ -155,10 +103,10 @@ class WPRestApiExtensions {
         $returnCat["category_count"] = $category->category_count;
         $returnCat["slug"] = $category->slug;
         $returnCat["description"] = $category->description;
-        
+
         return $returnCat;
     }
-    
+
     static function filter_post($post) {
         //var_dump($post);
 
@@ -167,14 +115,14 @@ class WPRestApiExtensions {
         $returnPost["post_content"] = $post->post_content;
         $returnPost["post_title"] = $post->post_title;
         $returnPost["post_name"] = $post->post_name;
-        
+
         return $returnPost;
     }
-    
+
     static function tag($WP_REST_Request_arg) {
 
         self::add_message($WP_REST_Request_arg["tag_name"]);
-        
+
         if (empty($WP_REST_Request_arg["tag_name"])) {
             return new WP_Error('WPRestApiExtensions', 'No such tag.', array('status' => 404));
         }
@@ -182,9 +130,9 @@ class WPRestApiExtensions {
         $response = [];
         $response["data"] = [];
         $response["status_code"] = 200;
-        $response["uri"] = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s:" : ":"). "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        $response["uri"] = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s:" : ":") . "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
-        
+
         // add the filter
         add_filter('get_tags', 'WPRestApiExtensions::filter_tag', 10, 1);
 
@@ -195,9 +143,6 @@ class WPRestApiExtensions {
         );
 
         $tag = get_tags($searchObj);
-
-        //$tags = apply_filters( 'WPRestApiExtensions::filter_tag', $tags );
-
 
         if (empty($tag)) {
 
@@ -220,71 +165,114 @@ class WPRestApiExtensions {
                 return new WP_Error('WPRestApiExtensions', 'No such tag.', array('status' => 404));
             }
         }
-        
+
         // remove the filter
         remove_filter('get_tags', 'WPRestApiExtensions::filter_tag');
-        array_push($response["data"],$tag[0]);
-        
+        array_push($response["data"], $tag[0]);
+
         return $response;
     }
     
+    static function get_pagination($response){
+        
+        $pagination = array();
+        
+        if ($response["page"]<2){
+            $pagination["prev"] = false;
+        } else {
+            $pagination["prev"] = $response["page"] - 1;
+        }
+        
+        if ($response["page"]<$response["total_pages"]){
+            $pagination["next"] = $response["page"] + 1;
+
+            } else {
+            
+                $pagination["next"] = false;
+
+        }
+       
+        return $pagination;
+    }
+
     static function posts($WP_REST_Request_arg) {
 
         self::add_message($WP_REST_Request_arg["name"]);
+        
+        if (isset($WP_REST_Request_arg["page"])) {
+            if ($WP_REST_Request_arg["page"] < 1){
+                return new WP_Error('WPRestApiExtensions', 'No posts found.', array('status' => 404));
+            }
+        }
 
         // build the WP_Query query
         $args = array();
 
-        if (isset($WP_REST_Request_arg["per_page"])){
+        if (isset($WP_REST_Request_arg["per_page"])) {
             $args['posts_per_page'] = $WP_REST_Request_arg["per_page"];
         }
-        
-        if (isset($WP_REST_Request_arg["current_page"])){
-            $args['paged'] = $WP_REST_Request_arg["current_page"];
+
+        if (isset($WP_REST_Request_arg["page"])) {
+            $args['paged'] = $WP_REST_Request_arg["page"];
         }
-        
-        if (isset($WP_REST_Request_arg["tag"])){
-            $args['tag'] = $WP_REST_Request_arg["tag"];
+
+        if (isset($WP_REST_Request_arg["tags"])) {
+            $args['tag'] = $WP_REST_Request_arg["tags"];
         }
-        
+
+        if (isset($WP_REST_Request_arg["search"]) && !empty($WP_REST_Request_arg["search"])) {
+            $args['s'] = $WP_REST_Request_arg["search"];
+        }
+
         // now build the pages to return
-        $the_query = new WP_Query( $args );
+        $the_query = new WP_Query($args);
 
         $response = [];
-        $response['total']=$the_query->found_posts;
-        $response['total_pages']=$the_query->max_num_pages;
-        $response['per_page']=$WP_REST_Request_arg["per_page"];
-        $response["status_code"] = 200;
-        $response["current_page"] = $WP_REST_Request_arg["current_page"];
+
         $response["data"] = [];
 
-        $response["uri"] = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s:" : ":"). "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        $response["uri"] = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s:" : ":") . "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
-        foreach($the_query->get_posts() as $post){
-            
+        foreach ($the_query->get_posts() as $post) {
+
             // just add the fields we need
             $returnPost = self::filter_post($post);
-            
+
             // add tags
             $returnPost["tags"] = self::filter_tag(wp_get_post_tags($post->ID));
-            
+
             // add categories to the post
             $categoryIds = wp_get_post_categories($post->ID);
             $returnPost["categories"] = [];
-            foreach ($categoryIds as $categoryId){
-                $cat = get_category( $categoryId );
-                array_push($returnPost["categories"],self::filter_category($cat));
+            foreach ($categoryIds as $categoryId) {
+                $cat = get_category($categoryId);
+                array_push($returnPost["categories"], self::filter_category($cat));
             }
 
-            array_push($response["data"],$returnPost);
-
+            array_push($response["data"], $returnPost);
         }
+        
+        // get some additional data back
+        $response['total'] = $the_query->found_posts;
+        $response['total_pages'] = $the_query->max_num_pages;
+        $response['per_page'] = $WP_REST_Request_arg["per_page"];
+        $response["status_code"] = 200;
+        $response["page"] = $WP_REST_Request_arg["page"];
+        
+        
+        $response["pagination"] = self::get_pagination($response);
+        
         
         /* Restore original Post Data */
         wp_reset_postdata();
-        
+
+        if (empty($response["data"])) {
+            return new WP_Error('WPRestApiExtensions', 'No posts found.', array('status' => 404));
+        }
+
         return $response;
     }
+
 }
 
 // register activation and deactivation
@@ -295,7 +283,6 @@ register_deactivation_hook(__FILE__, 'WPRestApiExtensions::deactivation');
 add_action('admin_menu', 'WPRestApiExtensions::plugin_menu');
 
 // add for rest api
-add_action('rest_api_init', 'WPRestApiExtensions::extend_with_post_data');
 add_action('rest_api_init', function () {
     register_rest_route('wprestapiextensions/v1', '/tag', array(
         'methods' => 'GET',

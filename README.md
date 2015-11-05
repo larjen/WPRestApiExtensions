@@ -1,6 +1,6 @@
 # WPRestApiExtensions
 
-Extends the WP-REST API to get additional fields from responses.
+Extends the WP-REST API with custom read only endpoints.
 
 ## Installation
 
@@ -8,6 +8,10 @@ Extends the WP-REST API to get additional fields from responses.
 2. Activate plugin.
 
 ## Changelog
+
+### 1.0.5
+* Added search capability.
+* Added simple pagination.
 
 ### 1.0.4
 * Added new endpoint for posts
