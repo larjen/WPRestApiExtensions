@@ -172,35 +172,32 @@ class WPRestApiExtensions {
 
         return $response;
     }
-    
-    static function get_pagination($response){
-        
+
+    static function get_pagination($response) {
+
         $pagination = array();
-        
-        if ($response["page"]<2){
+
+        if ($response["page"] < 2) {
             $pagination["prev"] = false;
         } else {
             $pagination["prev"] = $response["page"] - 1;
         }
-        
-        if ($response["page"]<$response["total_pages"]){
+
+        if ($response["page"] < $response["total_pages"]) {
             $pagination["next"] = $response["page"] + 1;
-
-            } else {
-            
-                $pagination["next"] = false;
-
+        } else {
+            $pagination["next"] = false;
         }
-       
+
         return $pagination;
     }
 
     static function posts($WP_REST_Request_arg) {
 
         self::add_message($WP_REST_Request_arg["name"]);
-        
+
         if (isset($WP_REST_Request_arg["page"])) {
-            if ($WP_REST_Request_arg["page"] < 1){
+            if ($WP_REST_Request_arg["page"] < 1) {
                 return new WP_Error('WPRestApiExtensions', 'No posts found.', array('status' => 404));
             }
         }
@@ -251,18 +248,18 @@ class WPRestApiExtensions {
 
             array_push($response["data"], $returnPost);
         }
-        
+
         // get some additional data back
         $response['total'] = $the_query->found_posts;
         $response['total_pages'] = $the_query->max_num_pages;
         $response['per_page'] = $WP_REST_Request_arg["per_page"];
         $response["status_code"] = 200;
         $response["page"] = $WP_REST_Request_arg["page"];
-        
-        
+
+
         $response["pagination"] = self::get_pagination($response);
-        
-        
+
+
         /* Restore original Post Data */
         wp_reset_postdata();
 
