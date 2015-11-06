@@ -12,6 +12,7 @@ Extends the WP-REST API with custom read only endpoints.
 ### 1.0.5
 * Added search capability.
 * Added simple pagination.
+* Added a five minute caching.
 
 ### 1.0.4
 * Added new endpoint for posts

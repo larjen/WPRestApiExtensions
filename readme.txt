@@ -33,6 +33,7 @@ Yes.
 
 * Added search capability.
 * Added simple pagination.
+* Added a five minute caching.
 
 = 1.0.4 =
 
