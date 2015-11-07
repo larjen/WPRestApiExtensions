@@ -9,7 +9,7 @@ class WPRestApiExtensions {
 
     // values to use internally in the plugin, do not customize
     static function activation() {
-        update_option(self::$plugin_salt . "_MESSAGES", []);
+        update_option(self::$plugin_name . "_MESSAGES", []);
         self::add_message('Plugin WPRestApiExtensions activated.');
     }
     
