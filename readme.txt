@@ -29,6 +29,9 @@ Yes.
 
 == Changelog ==
 
+= 1.0.6 =
+* Refactoring plugin for better performance.
+
 = 1.0.5 =
 
 * Added search capability.

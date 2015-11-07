@@ -9,6 +9,9 @@ Extends the WP-REST API with custom read only endpoints.
 
 ## Changelog
 
+### 1.0.6
+* Refactoring plugin for better performance.
+
 ### 1.0.5
 * Added search capability.
 * Added simple pagination.
