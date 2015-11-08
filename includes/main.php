@@ -4,7 +4,7 @@ class WPRestApiExtensions {
 
     // values to use internally in the plugin, do not customize
 
-    static $debug = false;
+    static $debug = true;
     static $plugin_name = "WPRestApiExtensions";
 
     // values to use internally in the plugin, do not customize
@@ -20,8 +20,6 @@ class WPRestApiExtensions {
     
     static function add_message($message) {
         
-        error_log('added message');
-
         $messages = get_option(self::$plugin_name . "_MESSAGES");
         array_push($messages, date("Y-m-d H:i:s") . " - " . $message);
 
