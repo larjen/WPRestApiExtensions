@@ -7,19 +7,26 @@ class WPRestApiExtensions {
     static $debug = true;
     static $plugin_name = "WPRestApiExtensions";
 
-    // values to use internally in the plugin, do not customize
+
+    /*
+     * Activation
+     */
     static function activation() {
         update_option(self::$plugin_name . "_MESSAGES", []);
         self::add_message('Plugin WPRestApiExtensions activated.');
     }
     
+    /*
+     * Deactivation
+     */
     static function deactivation() {
         self::add_message('Plugin WPRestApiExtensions deactivated.');
     }
 
-    
+    /*
+     * Adds messages
+     */
     static function add_message($message) {
-        
         $messages = get_option(self::$plugin_name . "_MESSAGES");
         array_push($messages, date("Y-m-d H:i:s") . " - " . $message);
 
@@ -32,9 +39,8 @@ class WPRestApiExtensions {
     }
     
     /*
-     * Retrieve tagsfrom name parameter
+     * Filter tags
      */
-
     static function filter_tag($tags) {
 
         $returnTags = [];
@@ -52,6 +58,9 @@ class WPRestApiExtensions {
         return $returnTags;
     }
 
+    /*
+     * Filter categories
+     */
     static function filter_category($category) {
         //var_dump($category);
 
@@ -64,6 +73,9 @@ class WPRestApiExtensions {
         return $returnCat;
     }
 
+    /*
+     * Filter posts
+     */
     static function filter_post($post) {
         //var_dump($post);
 
@@ -76,6 +88,23 @@ class WPRestApiExtensions {
         return $returnPost;
     }
 
+    /*
+     * At the end of each reply either return the reply or return an error.
+     */
+    static function return_code($response){
+            // if there was an error return an error
+            if ($response["status_code"] !== 200){
+                //return $response;
+
+                return new WP_Error('WPRestApiExtensions', $response["status_message"], array('status' => $response["status_code"]));
+            }else{
+                return $response;
+            }
+    }
+    
+    /*
+     * Lookup one tag 
+     */
     static function tag($WP_REST_Request_arg) {
 
         self::add_message($WP_REST_Request_arg["tag_name"]);
@@ -135,27 +164,21 @@ class WPRestApiExtensions {
             // store in cache for 5 minutes
             set_transient($cache_key, $response, 60 * 5);
             
-            // if there was an error return an error
-            if ($response["status_code"] !== 200){
-                return new WP_Error('WPRestApiExtensions', $response["status_message"], array('status' => $response["status_code"]));
-            }else{
-                return $response;
-            }
-
+            // return the result
+            return self::return_code($response);
             
         } else {
 
-            // if there was an error return an error
-            if ($value["status_code"] !== 200){
-                return new WP_Error('WPRestApiExtensions', $value["status_message"], array('status' => $value["status_code"]));
-            }else{
-                return $value;
-            }
+            // return the result
+            return self::return_code($value);
+
         }
     }
 
+    /*
+     * From a response get a pagination object 
+     */
     static function get_pagination($response) {
-
         $pagination = array();
 
         if ($response["page"] < 2) {
@@ -173,6 +196,9 @@ class WPRestApiExtensions {
         return $pagination;
     }
 
+    /*
+     * Return an array of posts
+     */
     static function posts($WP_REST_Request_arg) {
 
         self::add_message($WP_REST_Request_arg["name"]);
@@ -254,22 +280,13 @@ class WPRestApiExtensions {
             set_transient($cache_key, $response, 60 * 5);
 
             // if there was an error return an error
-            if ($response["status_code"] !== 200){
-                return new WP_Error('WPRestApiExtensions', $response["status_message"], array('status' => $response["status_code"]));
-            }else{
-                return $response;
-            }
+            return self::return_code($response);
             
         } else {
             
-            // if there was an error return an error
-            if ($value["status_code"] !== 200){
-                return new WP_Error('WPRestApiExtensions', $value["status_message"], array('status' => $value["status_code"]));
-            }else{
-                return $value;
-            }
-
-            return $value;
+            // return the result
+            return self::return_code($value);
+            
         }
     }
 }

@@ -14,6 +14,7 @@ class WPRestApiExtensionsAdmin extends WPRestApiExtensions {
         // debug
         if (self::$debug) {
             echo '<pre>';
+            echo 'ABSPATH=' .ABSPATH;
             echo 'get_option("' . self::$plugin_name . '_MESSAGES")=' . var_dump(get_option(self::$plugin_name . "_MESSAGES") ). PHP_EOL;
             echo '</pre>';
         }
