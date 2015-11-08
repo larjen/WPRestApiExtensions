@@ -7,77 +7,81 @@ class WPRestApiExtensions {
     static $debug = false;
     static $plugin_name = "WPRestApiExtensions";
 
-
     /*
      * Activation
      */
+
     static function activation() {
         update_option(self::$plugin_name . "_MESSAGES", []);
         self::add_message('Plugin WPRestApiExtensions activated.');
     }
-    
+
     /*
      * Deactivation
      */
+
     static function deactivation() {
         self::add_message('Plugin WPRestApiExtensions deactivated.');
     }
 
-
     /*
      * Copies one directory to another
      */
-    
-    static function recurse_copy($src,$dst) { 
-        $dir = opendir($src); 
-        @mkdir($dst); 
-        while(false !== ( $file = readdir($dir)) ) { 
-            if (( $file != '.' ) && ( $file != '..' )) { 
-                if ( is_dir($src . '/' . $file) ) { 
-                    self::recurse_copy($src . '/' . $file,$dst . '/' . $file); 
-                } 
-                else { 
-                    copy($src . '/' . $file,$dst . '/' . $file); 
-                } 
-            } 
-        } 
-        closedir($dir); 
-    } 
+
+    static function recurse_copy($src, $dst) {
+        $dir = opendir($src);
+        @mkdir($dst);
+        while (false !== ( $file = readdir($dir))) {
+            if (( $file != '.' ) && ( $file != '..' )) {
+                if (is_dir($src . '/' . $file)) {
+                    self::recurse_copy($src . '/' . $file, $dst . '/' . $file);
+                } else {
+                    copy($src . '/' . $file, $dst . '/' . $file);
+                }
+            }
+        }
+        closedir($dir);
+    }
 
     /*
      * Deploy cache
      */
+
     static function deploy_cache() {
-        
+
         $source_dir = __DIR__ . DIRECTORY_SEPARATOR . "rest-api";
         $destination_dir = ABSPATH . "rest-api";
-        
+
         self::recurse_copy($source_dir, $destination_dir);
-        
-        self::add_message('Plugin WPRestApiExtensions deploying cache mechanism<br /> from: '.$source_dir.'<br /> to: '.$destination_dir);
+        self::wipe_cache();
+                
+        self::add_message('Plugin WPRestApiExtensions deploying cache mechanism<br /> from: ' . $source_dir . '<br /> to: ' . $destination_dir);
     }
-    
+
     /*
      * Wipe cache
      */
+
     static function wipe_cache() {
-        
+
         $cache_dir = ABSPATH . "rest-api" . DIRECTORY_SEPARATOR . "cache";
-        
-        @mkdir($cache_dir); 
-        
+
+        @mkdir($cache_dir);
+
         $files = glob($cache_dir . '*');
         foreach ($files as $file) {
-        if (is_file($file))
-            unlink($file);
+            if (is_file($file)) {
+                unlink($file);
+            }
         }
-        
-        self::add_message('Plugin WPRestApiExtensions wiped cache at : '.$cache_dir.'.');
+
+        self::add_message('Plugin WPRestApiExtensions wiped cache at : ' . $cache_dir . '.');
     }
-    
+
     /*
      * Adds messages
      */
+
     static function add_message($message) {
         $messages = get_option(self::$plugin_name . "_MESSAGES");
         array_push($messages, date("Y-m-d H:i:s") . " - " . $message);
@@ -89,10 +93,11 @@ class WPRestApiExtensions {
 
         update_option(self::$plugin_name . "_MESSAGES", $messages);
     }
-    
+
     /*
      * Filter tags
      */
+
     static function filter_tag($tags) {
 
         $returnTags = [];
@@ -113,6 +118,7 @@ class WPRestApiExtensions {
     /*
      * Filter categories
      */
+
     static function filter_category($category) {
         //var_dump($category);
 
@@ -128,6 +134,7 @@ class WPRestApiExtensions {
     /*
      * Filter posts
      */
+
     static function filter_post($post) {
         //var_dump($post);
 
@@ -143,20 +150,22 @@ class WPRestApiExtensions {
     /*
      * At the end of each reply either return the reply or return an error.
      */
-    static function return_code($response){
-            // if there was an error return an error
-            if ($response["status_code"] !== 200){
-                //return $response;
 
-                return new WP_Error('WPRestApiExtensions', $response["status_message"], array('status' => $response["status_code"]));
-            }else{
-                return $response;
-            }
+    static function return_code($response) {
+        // if there was an error return an error
+        if ($response["status_code"] !== 200) {
+            //return $response;
+
+            return new WP_Error('WPRestApiExtensions', $response["status_message"], array('status' => $response["status_code"]));
+        } else {
+            return $response;
+        }
     }
-    
+
     /*
      * Lookup one tag 
      */
+
     static function tag($WP_REST_Request_arg) {
 
         if (empty($WP_REST_Request_arg["tag_name"])) {
@@ -206,28 +215,27 @@ class WPRestApiExtensions {
 
             // remove the filter
             remove_filter('get_tags', 'WPRestApiExtensions::filter_tag');
-            
+
             if (!empty($tag)) {
                 array_push($response["data"], $tag[0]);
             }
-            
+
             // store in cache for 5 minutes
             set_transient($cache_key, $response, 60 * 5);
-            
+
             // return the result
             return self::return_code($response);
-            
         } else {
 
             // return the result
             return self::return_code($value);
-
         }
     }
 
     /*
      * From a response get a pagination object 
      */
+
     static function get_pagination($response) {
         $pagination = array();
 
@@ -249,6 +257,7 @@ class WPRestApiExtensions {
     /*
      * Return an array of posts
      */
+
     static function posts($WP_REST_Request_arg) {
 
         if (isset($WP_REST_Request_arg["page"])) {
@@ -329,14 +338,13 @@ class WPRestApiExtensions {
 
             // if there was an error return an error
             return self::return_code($response);
-            
         } else {
-            
+
             // return the result
             return self::return_code($value);
-            
         }
     }
+
 }
 
 // add for rest api
