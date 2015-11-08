@@ -18,6 +18,18 @@ class WPRestApiExtensionsAdmin extends WPRestApiExtensions {
         if (isset($_POST[self::$plugin_name."_WIPE_CACHE"])) {
             self::wipe_cache();
         }
+
+        if (isset($_POST["ACTIVE"])) {
+            if ($_POST["ACTIVE"] == 'activated') {
+                set_option(self::$plugin_name . "_ACTIVE", true);
+            }
+
+            if ($_POST["ACTIVE"] == 'deactivated') {
+                set_option(self::$plugin_name . "_ACTIVE", false);
+            }
+        }
+
+
         
         // debug
         if (self::$debug) {
@@ -51,6 +63,14 @@ class WPRestApiExtensionsAdmin extends WPRestApiExtensions {
         echo '<p class="description">If your posts have changed, the infinite cache will serve stale responses.</p>';
         echo '</fieldset></td></tr>';
 
+        echo '<tr valign="top"><th scope="row">Schedule cache wipe</th><td><fieldset><legend class="screen-reader-text"><span>Activate</span></legend>';
+        if (get_option(self::$plugin_name . "_ACTIVE") == true) {
+            echo '<label for="ACTIVE"><input checked="checked" id="ACTIVE" name="ACTIVE" type="radio" value="activated"> Actively wiping cache when posts are altered.</label><br /><legend class="screen-reader-text"><span>Dectivate</span></legend><label for="DEACTIVE"><input id="DEACTIVE" name="ACTIVE" type="radio" value="deactivated"> Cache is never auto wiped.</label>';
+        } else {
+            echo '<label for="ACTIVE"><input id="ACTIVE" name="ACTIVE" type="radio" value="activated"> Actively wiping cache when posts are altered.</label><br /><legend class="screen-reader-text"><span>Dectivate</span></legend><label for="DEACTIVE"><input checked="checked" id="DEACTIVE" name="ACTIVE" type="radio" value="deactivated"> Cache is never auto wiped.</label>';
+        }
+        echo '<p class="description">When activated the entire cache will be scheduled for a wipe five minutes after last post alteration.</p>';
+        echo '</fieldset></td></tr>';
         
         echo '</tbody></table>';
 
