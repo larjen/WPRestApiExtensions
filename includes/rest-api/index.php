@@ -128,17 +128,16 @@ function get_cached($cache_key) {
     print_result($output_array[1],$output_array[0]);
 }
 
-//$URI_parameters = explode("/rest-api", $_SERVER["REQUEST_URI"]);
-//$URI = "http://" . $_SERVER["HTTP_HOST"] . "/wp-json/wprestapiextensions" . $URI_parameters[1];
-$cache_key = get_cache_key();
-
-
 // if purge set - wipe cache
 if (isset($_GET["PURGE_CACHE"]) && !defined('ENDPOINT') ) {
     wipe_cache();
 } else {
     // check if response is in cache
-    if (get_cached($cache_key) === false) {
-        get_fresh($cache_key);
+    if (defined('ENDPOINT')){
+        $cache_key = get_cache_key();
+        
+        if (get_cached($cache_key) === false) {
+            get_fresh($cache_key);
+        }
     }
 }
