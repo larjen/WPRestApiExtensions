@@ -33,7 +33,6 @@ of the cache which will occur 5 minutes after last post alteration.
 
 ### 1.0.6
 * Refactoring plugin for better performance.
-* Refactoring plugin for better performance.
 * Adding an infinite cache for faster rest-api requests.
 * Deploy cache mechanism from control panel.
 * Optional wipe cache functionality when posts have been altered.
