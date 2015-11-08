@@ -14,6 +14,10 @@ class WPRestApiExtensionsAdmin extends WPRestApiExtensions {
         if (isset($_POST[self::$plugin_name."_DEPLOY_CACHE"])) {
             self::deploy_cache();
         }
+
+        if (isset($_POST[self::$plugin_name."_WIPE_CACHE"])) {
+            self::wipe_cache();
+        }
         
         // debug
         if (self::$debug) {
@@ -39,10 +43,15 @@ class WPRestApiExtensionsAdmin extends WPRestApiExtensions {
         echo '<form method="post" action="">';
         echo '<table class="form-table"><tbody>';
         
-        echo '<tr valign="top"><th scope="row">Deploy and clean cache</th><td><fieldset><legend class="screen-reader-text"><span>Deploy cache</span></legend><label for="DEPLOY_CACHE"><input id="DEPLOY_CACHE" name="'.self::$plugin_name.'_DEPLOY_CACHE" type="checkbox"></label>';
-        echo '<p class="description">Provides infinetely cached endpoints to the REST API. Bypassing WordPress when requesting data from the REST API will dramatically improve the response times.</p>';
+        echo '<tr valign="top"><th scope="row">Deploy cache</th><td><fieldset><legend class="screen-reader-text"><span>Deploy cache</span></legend><label for="DEPLOY_CACHE"><input id="DEPLOY_CACHE" name="'.self::$plugin_name.'_DEPLOY_CACHE" type="checkbox"></label>';
+        echo '<p class="description">Provides infinetely cached endpoints to the REST API.</p>';
         echo '</fieldset></td></tr>';
 
+        echo '<tr valign="top"><th scope="row">Wipe cache</th><td><fieldset><legend class="screen-reader-text"><span>Wipe cache</span></legend><label for="WIPE_CACHE"><input id="WIPE_CACHE" name="'.self::$plugin_name.'_WIPE_CACHE" type="checkbox"></label>';
+        echo '<p class="description">If your posts have changed, the infinite cache will serve stale responses.</p>';
+        echo '</fieldset></td></tr>';
+
+        
         echo '</tbody></table>';
 
 

@@ -51,10 +51,21 @@ class WPRestApiExtensions {
         $source_dir = __DIR__ . DIRECTORY_SEPARATOR . "rest-api";
         $destination_dir = ABSPATH . "rest-api";
         
-        self::add_message('Plugin WPRestApiExtensions deploying cache<br /> from: '.$source_dir.'<br /> to: '.$destination_dir.'.');
+        self::recurse_copy($source_dir, $destination_dir);
+        
+        self::add_message('Plugin WPRestApiExtensions deploying cache mechanism<br /> from: '.$source_dir.'<br /> to: '.$destination_dir);
     }
     
-
+    /*
+     * Wipe cache
+     */
+    static function wipe_cache() {
+        
+        $cache_dir = ABSPATH . "rest-api" . DIRECTORY_SEPARATOR . "cache";
+        @mkdir($cache_dir); 
+        self::add_message('Plugin WPRestApiExtensions wiped cache at : '.$cache_dir.'.');
+    }
+    
     /*
      * Adds messages
      */
