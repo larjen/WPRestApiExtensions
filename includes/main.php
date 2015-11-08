@@ -22,7 +22,8 @@ class WPRestApiExtensions {
     static function deactivation() {
         self::add_message('Plugin WPRestApiExtensions deactivated.');
     }
-    
+
+
     /*
      * Copies one directory to another
      */
@@ -44,7 +45,7 @@ class WPRestApiExtensions {
     } 
 
     /*
-     * Deploy cache (also wipes it)
+     * Deploy cache
      */
     static function deploy_cache() {
         
@@ -62,7 +63,15 @@ class WPRestApiExtensions {
     static function wipe_cache() {
         
         $cache_dir = ABSPATH . "rest-api" . DIRECTORY_SEPARATOR . "cache";
+        
         @mkdir($cache_dir); 
+        
+        $files = glob($cache_dir . '*');
+        foreach ($files as $file) {
+        if (is_file($file))
+            unlink($file);
+        }
+        
         self::add_message('Plugin WPRestApiExtensions wiped cache at : '.$cache_dir.'.');
     }
     
