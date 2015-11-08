@@ -4,7 +4,7 @@ class WPRestApiExtensions {
 
     // values to use internally in the plugin, do not customize
 
-    static $debug = false;
+    static $debug = true;
     static $plugin_name = "WPRestApiExtensions";
 
     /*
@@ -13,7 +13,7 @@ class WPRestApiExtensions {
 
     static function activation() {
         update_option(self::$plugin_name . "_MESSAGES", []);
-        set_option(self::$plugin_name . "_ACTIVE", false);
+        update_option(self::$plugin_name . "_ACTIVE", false);
         self::add_message('Plugin WPRestApiExtensions activated.');
     }
 
@@ -22,6 +22,8 @@ class WPRestApiExtensions {
      */
 
     static function deactivation() {
+        
+        self::clear_schedule();
         self::add_message('Plugin WPRestApiExtensions deactivated.');
     }
 
@@ -33,7 +35,7 @@ class WPRestApiExtensions {
         self::clear_schedule();
 
         //gives the unix timestamp for today's date + 1 minute
-        $start = strtotime(date('D M Y')) + (5 * 60);
+        $start = time() + (5 * 60);
 
         // schedule wipe of cache in 5 minutes, when cache has been wiped
         // the scheduler will be cleared so this does not repeat hourly
@@ -48,7 +50,7 @@ class WPRestApiExtensions {
         self::clear_schedule();
         
         // only wipe the cache if the cache wiping is activated
-        if (get_option(self::$plugin_name . "_ACTIVE") === true){
+        if (get_option(self::$plugin_name . "_ACTIVE") == true){
             self::wipe_cache();
         }
     }   
@@ -383,7 +385,7 @@ class WPRestApiExtensions {
 }
 
 // register wp hooks
-add_action('save_post', 'WPTagSanitizer::sanitizePost');
+add_action('save_post', 'WPRestApiExtensions::schedule_wipe_of_cache');
 
 // add action to wipe cache
 add_action('WPRestApiExtensionsWipeCache', 'WPRestApiExtensions::do_scheduled_cache_wipe');
