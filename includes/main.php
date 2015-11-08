@@ -4,7 +4,7 @@ class WPRestApiExtensions {
 
     // values to use internally in the plugin, do not customize
 
-    static $debug = true;
+    static $debug = false;
     static $plugin_name = "WPRestApiExtensions";
 
 
@@ -22,6 +22,38 @@ class WPRestApiExtensions {
     static function deactivation() {
         self::add_message('Plugin WPRestApiExtensions deactivated.');
     }
+    
+    /*
+     * Copies one directory to another
+     */
+    
+    static function recurse_copy($src,$dst) { 
+        $dir = opendir($src); 
+        @mkdir($dst); 
+        while(false !== ( $file = readdir($dir)) ) { 
+            if (( $file != '.' ) && ( $file != '..' )) { 
+                if ( is_dir($src . '/' . $file) ) { 
+                    self::recurse_copy($src . '/' . $file,$dst . '/' . $file); 
+                } 
+                else { 
+                    copy($src . '/' . $file,$dst . '/' . $file); 
+                } 
+            } 
+        } 
+        closedir($dir); 
+    } 
+
+    /*
+     * Deploy cache (also wipes it)
+     */
+    static function deploy_cache() {
+        
+        $source_dir = __DIR__ . DIRECTORY_SEPARATOR . "rest-api";
+        $destination_dir = ABSPATH . "rest-api";
+        
+        self::add_message('Plugin WPRestApiExtensions deploying cache<br /> from: '.$source_dir.'<br /> to: '.$destination_dir.'.');
+    }
+    
 
     /*
      * Adds messages
@@ -106,8 +138,6 @@ class WPRestApiExtensions {
      * Lookup one tag 
      */
     static function tag($WP_REST_Request_arg) {
-
-        self::add_message($WP_REST_Request_arg["tag_name"]);
 
         if (empty($WP_REST_Request_arg["tag_name"])) {
             return new WP_Error('WPRestApiExtensions', 'No such tag.', array('status' => 404));
@@ -200,8 +230,6 @@ class WPRestApiExtensions {
      * Return an array of posts
      */
     static function posts($WP_REST_Request_arg) {
-
-        self::add_message($WP_REST_Request_arg["name"]);
 
         if (isset($WP_REST_Request_arg["page"])) {
             if ($WP_REST_Request_arg["page"] < 1) {
