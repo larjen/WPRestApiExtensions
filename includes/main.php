@@ -4,7 +4,7 @@ class WPRestApiExtensions {
 
     // values to use internally in the plugin, do not customize
 
-    static $debug = true;
+    static $debug = false;
     static $plugin_name = "WPRestApiExtensions";
 
     /*

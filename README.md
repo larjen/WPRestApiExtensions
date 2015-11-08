@@ -2,6 +2,28 @@
 
 Extends the WP-REST API with custom read only endpoints.
 
+If you have a WordPress blog at http://www.example.com you can reach the read
+only REST API by requesting these endpoints:
+
+    http://www.example.com/wp-json/wprestapiextensions/v1/posts?page=1&per_page=12&search=query&tags=tag1+tag2
+    http://www.example.com/wp-json/wprestapiextensions/v1/tag?tag_name=tag1
+    http://www.example.com/wp-json/wprestapiextensions/v1/post
+    
+The above endpoints does read from database whenever they are requested, and are
+thus very slow to react. 
+
+From within the plugin, there is an option to deploy a cache in front of this
+REST API. When you deploy it, be warned that the folder "rest-api" will be
+created in the root of your webserver.
+
+You can then request the REST-API like this:
+
+    http://www.example.com/rest-api/v1/posts?page=1&per_page=12&search=query&tags=tag1+tag2
+    http://www.example.com/rest-api/v1/tag/?_jsonp=angular.callbacks._1&tag_name=tag1
+
+Since these requests are infinitely cached, you can schedule an optional wipe
+of the cache which will occur 5 minutes after last post alteration.
+
 ## Installation
 
 1. Download to your Wordpress plugin folder and unzip.
@@ -11,6 +33,10 @@ Extends the WP-REST API with custom read only endpoints.
 
 ### 1.0.6
 * Refactoring plugin for better performance.
+* Refactoring plugin for better performance.
+* Adding an infinite cache for faster rest-api requests.
+* Deploy cache mechanism from control panel.
+* Optional wipe cache functionality when posts have been altered.
 
 ### 1.0.5
 * Added search capability.

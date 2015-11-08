@@ -9,6 +9,9 @@ include_once(__DIR__ . DIRECTORY_SEPARATOR . "includes". DIRECTORY_SEPARATOR . "
 class WPRestApiExtensionsUninstall extends WPRestApiExtensions {
     static function uninstall() {
         delete_option(self::$plugin_name . "_MESSAGES");
+        delete_option(self::$plugin_name . "_ACTIVE");
+        
+        // to-do add method to delete the infinite cache mechanism
     }
 }
 
