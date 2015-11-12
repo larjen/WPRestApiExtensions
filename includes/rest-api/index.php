@@ -44,8 +44,6 @@ function get_fresh($cache_key) {
 
     $URI = "http://" . $_SERVER["HTTP_HOST"] . PATH_TO_WP . "/wp-json/wprestapiextensions/v1/" . ENDPOINT . "/" . $request_parameters;
 
-    error_log($URI);
-
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $URI);
     curl_setopt($ch, CURLOPT_HEADER, 0);
