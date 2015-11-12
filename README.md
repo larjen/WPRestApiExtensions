@@ -57,3 +57,16 @@ of the cache which will occur 5 minutes after last post alteration.
 
 ### 1.0.0
 * Uploaded plugin.
+
+[//]: title (WPRestApiExtensions)
+[//]: category (work)
+[//]: start_date (20151030)
+[//]: end_date (#)
+[//]: excerpt (WordPress plugin that extends the WP-REST API with custom read only endpoints.)
+[//]: tag (GitHub)
+[//]: tag (WordPress)
+[//]: tag (PHP)
+[//]: url_github (https://github.com/larjen/WPRestApiExtensions)
+[//]: url_demo (#)
+[//]: url_wordpress (https://wordpress.org/plugins/WPRestApiExtensions/)
+[//]: url_download (https://github.com/larjen/WPRestApiExtensions/archive/master.zip)
