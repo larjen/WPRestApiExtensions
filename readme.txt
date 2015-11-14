@@ -14,27 +14,13 @@ Extends the WP-REST API with custom read only endpoints.
 
 Extends the WP-REST API with custom read only endpoints.
 
-If you have a WordPress blog at http://www.example.com you can reach the read
-only REST API by requesting these endpoints:
+If you have a WordPress blog at http://www.example.com you can reach the read only REST API by requesting these endpoints:
 
     http://www.example.com/wp-json/wprestapiextensions/v1/posts?page=1&per_page=12&search=query&tags=tag1+tag2
     http://www.example.com/wp-json/wprestapiextensions/v1/tag?tag_name=tag1
-    http://www.example.com/wp-json/wprestapiextensions/v1/post
+    http://www.example.com/wp-json/wprestapiextensions/v1/post?post=some-post-slug
     
-The above endpoints does read from database whenever they are requested, and are
-thus very slow to react. 
-
-From within the plugin, there is an option to deploy a cache in front of this
-REST API. When you deploy it, be warned that the folder "rest-api" will be
-created in the root of your webserver.
-
-You can then request the REST-API like this:
-
-    http://www.example.com/rest-api/v1/posts?page=1&per_page=12&search=query&tags=tag1+tag2
-    http://www.example.com/rest-api/v1/tag/?_jsonp=angular.callbacks._1&tag_name=tag1
-
-Since these requests are infinitely cached, you can schedule an optional wipe
-of the cache which will occur 5 minutes after last post alteration.
+The above endpoints will return a 404 error if nothing was found.
 
 == Installation ==
 
@@ -50,6 +36,9 @@ Yes.
 == Screenshots ==
 
 == Changelog ==
+
+= 1.0.7 =
+* Moving the cache mechanism to its own plugin at: [https://github.com/larjen/WPRestCache](https://github.com/larjen/WPRestCache)
 
 = 1.0.6 =
 * Refactoring plugin for better performance.

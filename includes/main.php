@@ -13,7 +13,6 @@ class WPRestApiExtensions {
 
     static function activation() {
         update_option(self::$plugin_name . "_MESSAGES", []);
-        update_option(self::$plugin_name . "_ACTIVE", false);
         self::add_message('Plugin WPRestApiExtensions activated.');
     }
 
@@ -22,97 +21,7 @@ class WPRestApiExtensions {
      */
 
     static function deactivation() {
-        
-        self::clear_schedule();
-        self::add_message('Plugin WPRestApiExtensions deactivated.');
-    }
-
-    /*
-     * Schedules a wipe of the cache to occur in 5 minutes
-     */
-    static function schedule_wipe_of_cache() {
-        // unschedule previous schedule
-        self::clear_schedule();
-
-        //gives the unix timestamp for today's date + 1 minute
-        $start = time() + (5 * 60);
-
-        // schedule wipe of cache in 5 minutes, when cache has been wiped
-        // the scheduler will be cleared so this does not repeat hourly
-        wp_schedule_event($start, 'hourly', 'WPRestApiExtensionsWipeCache');
-    }
-    
-    /*
-     * Wipe the cache, then clear the schedule
-     */
-    static function do_scheduled_cache_wipe() {
-    
-        self::clear_schedule();
-        
-        // only wipe the cache if the cache wiping is activated
-        if (get_option(self::$plugin_name . "_ACTIVE") == true){
-            self::wipe_cache();
-        }
-    }   
-    
-
-    static function clear_schedule() {
-        // unschedule previous schedule
-        wp_clear_scheduled_hook('WPRestApiExtensionsWipeCache');
-    }   
-    
-    /*
-     * Copies one directory to another
-     */
-
-    static function recurse_copy($src, $dst) {
-        $dir = opendir($src);
-        @mkdir($dst);
-        while (false !== ( $file = readdir($dir))) {
-            if (( $file != '.' ) && ( $file != '..' )) {
-                if (is_dir($src . '/' . $file)) {
-                    self::recurse_copy($src . '/' . $file, $dst . '/' . $file);
-                } else {
-                    copy($src . '/' . $file, $dst . '/' . $file);
-                }
-            }
-        }
-        closedir($dir);
-    }
-
-    /*
-     * Deploy cache
-     */
-
-    static function deploy_cache() {
-
-        $source_dir = __DIR__ . DIRECTORY_SEPARATOR . "rest-api";
-        $destination_dir = ABSPATH . "rest-api";
-
-        self::recurse_copy($source_dir, $destination_dir);
-        self::wipe_cache();
-                
-        self::add_message('Plugin WPRestApiExtensions deploying cache mechanism<br /> from: ' . $source_dir . '<br /> to: ' . $destination_dir);
-    }
-
-    /*
-     * Wipe cache
-     */
-
-    static function wipe_cache() {
-
-        $cache_dir = ABSPATH . "rest-api" . DIRECTORY_SEPARATOR . "cache" . DIRECTORY_SEPARATOR;
-
-        @mkdir($cache_dir);
-
-        $files = glob($cache_dir . '*');
-        foreach ($files as $file) {
-            if (is_file($file)) {
-                unlink($file);
-            }
-        }
-
-        self::add_message('Plugin WPRestApiExtensions wiped cache at : ' . $cache_dir . '.');
+        delete_option(self::$plugin_name . "_MESSAGES");
     }
 
     /*
@@ -390,12 +299,6 @@ class WPRestApiExtensions {
 
 }
 
-// register wp hooks
-add_action('save_post', 'WPRestApiExtensions::schedule_wipe_of_cache');
-
-// add action to wipe cache
-add_action('WPRestApiExtensionsWipeCache', 'WPRestApiExtensions::do_scheduled_cache_wipe');
-
 // add for rest api
 add_action('rest_api_init', function () {
     register_rest_route('wprestapiextensions/v1', '/tag', array(
@@ -407,5 +310,11 @@ add_action('rest_api_init', function () {
     register_rest_route('wprestapiextensions/v1', '/posts', array(
         'methods' => 'GET',
         'callback' => 'WPRestApiExtensions::posts',
+    ));
+});
+add_action('rest_api_init', function () {
+    register_rest_route('wprestapiextensions/v1', '/post', array(
+        'methods' => 'GET',
+        'callback' => 'WPRestApiExtensions::post',
     ));
 });
