@@ -173,14 +173,20 @@ class WPRestApiExtensions {
      */
 
     static function filter_post($post) {
-        //var_dump($post);
-
+        
+        //foreach($post as $key => $value){
+        //    error_log($key."=".$value);
+        //}
+        
+        
         $returnPost["ID"] = $post->ID;
         $returnPost["post_date"] = $post->post_date;
+        $returnPost["post_author"] = $post->post_author;
         $returnPost["post_content"] = $post->post_content;
         $returnPost["post_title"] = $post->post_title;
         $returnPost["post_name"] = $post->post_name;
-
+        $returnPost["post_excerpt"] = $post->post_excerpt;
+        
         return $returnPost;
     }
 
