@@ -19,6 +19,7 @@ The above endpoints will return a 404 error if nothing was found.
 
 ### 1.0.7
 * Moving the cache mechanism to its own plugin at: [https://github.com/larjen/WPRestCache](https://github.com/larjen/WPRestCache)
+* Removing transient caching from within the plugin, as it was ineffective compared to static file caching.
 
 ### 1.0.6
 * Refactoring plugin for better performance.
