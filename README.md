@@ -55,6 +55,7 @@ The above endpoints will return a 404 error if nothing was found.
 [//]: tag (GitHub)
 [//]: tag (WordPress)
 [//]: tag (PHP)
+[//]: tag (Work)
 [//]: url_github (https://github.com/larjen/WPRestApiExtensions)
 [//]: url_demo (#)
 [//]: url_wordpress (https://wordpress.org/plugins/WPRestApiExtensions/)

@@ -81,21 +81,21 @@ class WPRestApiExtensions {
      * Filter posts
      */
 
-    static function filter_post($post) {
-        
+    static function filter_posts($post) {
+
         //foreach($post as $key => $value){
         //    error_log($key."=".$value);
         //}
-        
-        
+
+
         $returnPost["ID"] = $post->ID;
         $returnPost["post_date"] = $post->post_date;
         $returnPost["post_author"] = $post->post_author;
-        $returnPost["post_content"] = $post->post_content;
+        //$returnPost["post_content"] = $post->post_content;
         $returnPost["post_title"] = $post->post_title;
         $returnPost["post_name"] = $post->post_name;
         $returnPost["post_excerpt"] = $post->post_excerpt;
-        
+
         return $returnPost;
     }
 
@@ -106,7 +106,7 @@ class WPRestApiExtensions {
     static function return_code($response) {
         // if there was an error return an error
         if ($response["status_code"] !== 200) {
-            //return $response;
+        //return $response;
 
             return new WP_Error('WPRestApiExtensions', $response["status_message"], array('status' => $response["status_code"]));
         } else {
@@ -253,7 +253,7 @@ class WPRestApiExtensions {
             foreach ($the_query->get_posts() as $post) {
 
                 // just add the fields we need
-                $returnPost = self::filter_post($post);
+                $returnPost = self::filter_posts($post);
 
                 // add tags
                 $returnPost["tags"] = self::filter_tag(wp_get_post_tags($post->ID));
@@ -295,6 +295,50 @@ class WPRestApiExtensions {
             // return the result
             return self::return_code($value);
         }
+    }
+
+    /*
+     * Return one post from post_name (slug)
+     */
+
+    static function post($WP_REST_Request_arg) {
+
+        if (isset($WP_REST_Request_arg["page_name"])) {
+            if (empty($WP_REST_Request_arg["page_name"])) {
+                return new WP_Error('WPRestApiExtensions', 'No posts found.', array('status' => 404));
+            }
+        } else {
+            return new WP_Error('WPRestApiExtensions', 'No posts found.', array('status' => 404));
+        }
+
+        // get the post from the slug
+        $args = array(
+            'name' => $WP_REST_Request_arg["page_name"],
+            'post_type' => 'post',
+            'post_status' => 'publish',
+            'numberposts' => 1
+        );
+
+        $post = get_posts($args);
+        if (empty($post)) {
+            return new WP_Error('WPRestApiExtensions', 'No posts found.', array('status' => 404));
+        }
+
+        $post = $post[0];
+
+
+        $response = [];
+
+        $response["data"] = [];
+
+        $response["uri"] = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s:" : ":") . "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+
+        $response["data"]["post"] = $post;
+
+        $response["status_code"] = 200;
+
+        // if there was an error return an error
+        return self::return_code($response);
     }
 
 }
