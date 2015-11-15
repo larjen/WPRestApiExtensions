@@ -280,8 +280,8 @@ class WPRestApiExtensions {
 
     static function post($WP_REST_Request_arg) {
 
-        if (isset($WP_REST_Request_arg["page_name"])) {
-            if (empty($WP_REST_Request_arg["page_name"])) {
+        if (isset($WP_REST_Request_arg["post_name"])) {
+            if (empty($WP_REST_Request_arg["post_name"])) {
                 return new WP_Error('WPRestApiExtensions', 'No posts found.', array('status' => 404));
             }
         } else {
@@ -290,7 +290,7 @@ class WPRestApiExtensions {
 
         // get the post from the slug
         $args = array(
-            'name' => $WP_REST_Request_arg["page_name"],
+            'name' => $WP_REST_Request_arg["post_name"],
             'post_type' => 'post',
             'post_status' => 'publish',
             'numberposts' => 1
@@ -303,17 +303,31 @@ class WPRestApiExtensions {
 
         $post = $post[0];
 
-
         $response = [];
 
         $response["data"] = [];
 
         $response["uri"] = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s:" : ":") . "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
-        $response["data"]["post"] = $post;
+        // just add the fields we need
+        //$returnPost = self::filter_posts($post);
+        
+        // add tags
+        $post->tags = self::filter_tag(wp_get_post_tags($post->ID));
+
+        // add categories to the post
+        $categoryIds = wp_get_post_categories($post->ID);
+        $post->categories = [];
+        foreach ($categoryIds as $categoryId) {
+            $cat = get_category($categoryId);
+            array_push($post->categories, self::filter_category($cat));
+        }
+
+        array_push($response["data"], $post);
 
         $response["status_code"] = 200;
 
+        
         // if there was an error return an error
         return self::return_code($response);
     }
