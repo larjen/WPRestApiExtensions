@@ -284,7 +284,7 @@ class WPRestApiExtensions {
     
     
     static function get_images($post_id){
-        
+        include( ABSPATH . 'wp-admin/includes/image.php' );
         
         // now get any images attached to the post
         $args = array(
@@ -294,7 +294,20 @@ class WPRestApiExtensions {
             'post_status' => 'any' 
         ); 
         
-        return get_children ( $args );
+        $images = get_children ( $args );
+        $images_meta = [];
+        
+        foreach ($images as $image){
+            
+            $new_image = [];
+            
+            array_push($new_image, get_post_meta($image->ID));
+            array_push($new_image, wp_get_attachment_metadata($image->ID,false));
+            
+            array_push($images_meta, $new_image);
+        }
+        
+        return $images_meta;
 
         
     }
