@@ -250,6 +250,10 @@ class WPRestApiExtensions {
                 $cat = get_category($categoryId);
                 array_push($returnPost["categories"], self::filter_category($cat));
             }
+            
+            // add images to the response
+            $returnPost["images"] = self::get_images($post->ID);
+
 
             array_push($response["data"], $returnPost);
         }
@@ -272,6 +276,27 @@ class WPRestApiExtensions {
 
         // if there was an error return an error
         return self::return_code($response);
+    }
+    
+    /*
+     * gets images for a specific post
+     */
+    
+    
+    static function get_images($post_id){
+        
+        
+        // now get any images attached to the post
+        $args = array(
+            'post_parent' => $post_id,
+            'post_type'   => 'any', 
+            'numberposts' => -1,
+            'post_status' => 'any' 
+        ); 
+        
+        return get_children ( $args );
+
+        
     }
 
     /*
@@ -322,6 +347,9 @@ class WPRestApiExtensions {
             $cat = get_category($categoryId);
             array_push($post->categories, self::filter_category($cat));
         }
+        
+        // add images to the response
+        $post->images = self::get_images($post->ID);
 
         array_push($response["data"], $post);
 
