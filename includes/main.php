@@ -115,7 +115,7 @@ class WPRestApiExtensions {
     }
 
     /*
-     * Lookup one tag 
+     * Lookup one tag
      */
 
     static function tag($WP_REST_Request_arg) {
@@ -173,7 +173,7 @@ class WPRestApiExtensions {
     }
 
     /*
-     * From a response get a pagination object 
+     * From a response get a pagination object
      */
 
     static function get_pagination($response) {
@@ -250,10 +250,9 @@ class WPRestApiExtensions {
                 $cat = get_category($categoryId);
                 array_push($returnPost["categories"], self::filter_category($cat));
             }
-            
+
             // add images to the response
             $returnPost["images"] = self::get_images($post->ID);
-
 
             array_push($response["data"], $returnPost);
         }
@@ -277,39 +276,45 @@ class WPRestApiExtensions {
         // if there was an error return an error
         return self::return_code($response);
     }
-    
+
     /*
      * gets images for a specific post
      */
-    
-    
+
+
     static function get_images($post_id){
-        include( ABSPATH . 'wp-admin/includes/image.php' );
-        
+        include_once( ABSPATH . 'wp-admin/includes/image.php' );
+
         // now get any images attached to the post
         $args = array(
             'post_parent' => $post_id,
-            'post_type'   => 'any', 
+            'post_type'   => 'any',
             'numberposts' => -1,
-            'post_status' => 'any' 
-        ); 
-        
+            'post_status' => 'any'
+        );
+
         $images = get_children ( $args );
         $images_meta = [];
-        
+
         foreach ($images as $image){
+
+            $new_image_temp = get_post_meta($image->ID);
             
-            $new_image = [];
+            // unset the data we dont need
+            if (isset($new_image_temp["type"])){
+                $new_image["type"] = $new_image_temp["type"];
+            }
+
+            $sizes_temp = wp_get_attachment_metadata($image->ID,false);
             
-            array_push($new_image, get_post_meta($image->ID));
-            array_push($new_image, wp_get_attachment_metadata($image->ID,false));
+            if (isset($sizes_temp["sizes"])){
+                $new_image["sizes"] = $sizes_temp["sizes"];
+            }
             
             array_push($images_meta, $new_image);
         }
-        
-        return $images_meta;
 
-        
+        return $images_meta;
     }
 
     /*
@@ -349,7 +354,7 @@ class WPRestApiExtensions {
 
         // just add the fields we need
         //$returnPost = self::filter_posts($post);
-        
+
         // add tags
         $post->tags = self::filter_tag(wp_get_post_tags($post->ID));
 
@@ -360,7 +365,7 @@ class WPRestApiExtensions {
             $cat = get_category($categoryId);
             array_push($post->categories, self::filter_category($cat));
         }
-        
+
         // add images to the response
         $post->images = self::get_images($post->ID);
 
@@ -368,7 +373,7 @@ class WPRestApiExtensions {
 
         $response["status_code"] = 200;
 
-        
+
         // if there was an error return an error
         return self::return_code($response);
     }
