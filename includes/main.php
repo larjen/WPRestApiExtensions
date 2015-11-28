@@ -301,8 +301,12 @@ class WPRestApiExtensions {
             $new_image_temp = get_post_meta($image->ID);
             
             // unset the data we dont need
-            if (isset($new_image_temp["type"])){
-                $new_image["type"] = $new_image_temp["type"];
+            if (isset($new_image_temp["type"][0])){
+                $new_image["type"] = $new_image_temp["type"][0];
+            }
+            
+            if (isset($new_image_temp["img_path"][0])){
+                $new_image["img_path"] = $new_image_temp["img_path"][0];
             }
 
             $sizes_temp = wp_get_attachment_metadata($image->ID,false);
