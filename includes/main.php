@@ -252,7 +252,7 @@ class WPRestApiExtensions {
             }
 
             // add images to the response
-            $returnPost["images"] = self::get_images($post->ID);
+            $returnPost["images"] = self::get_images($post->ID, true);
 
             array_push($response["data"], $returnPost);
         }
@@ -278,27 +278,11 @@ class WPRestApiExtensions {
     }
 
     /*
-     * gets images for a specific post
+     * Get information from image and return it as an array
      */
-
-
-    static function get_images($post_id){
-        include_once( ABSPATH . 'wp-admin/includes/image.php' );
-
-        // now get any images attached to the post
-        $args = array(
-            'post_parent' => $post_id,
-            'post_type'   => 'any',
-            'numberposts' => -1,
-            'post_status' => 'any'
-        );
-
-        $images = get_children ( $args );
-        $images_meta = [];
-
-        foreach ($images as $image){
-
-            $new_image_temp = get_post_meta($image->ID);
+    
+    static function get_image_information($image){
+        $new_image_temp = get_post_meta($image->ID);
             
             // unset the data we dont need
             if (isset($new_image_temp["type"][0])){
@@ -309,13 +293,68 @@ class WPRestApiExtensions {
                 $new_image["img_path"] = $new_image_temp["img_path"][0];
             }
 
+            if (isset($image->post_title)){
+                $new_image["title"] = $image->post_title;
+            }
+
+            if (isset($new_image_temp["_wp_attachment_image_alt"][0])){
+                $new_image["alt_text"] = $new_image_temp["_wp_attachment_image_alt"][0];
+            }
+
+            if (isset($image->post_content)){
+                $new_image["description"] = $image->post_content;
+            }
+
+            if (isset($image->post_excerpt)){
+                $new_image["caption"] = $image->post_excerpt;
+            }
+
+            
             $sizes_temp = wp_get_attachment_metadata($image->ID,false);
             
             if (isset($sizes_temp["sizes"])){
                 $new_image["sizes"] = $sizes_temp["sizes"];
             }
             
-            array_push($images_meta, $new_image);
+            return $new_image;
+    }
+    
+    
+    /*
+     * gets images for a specific post
+     */
+
+    static function get_images($post_id, $get_only_thumbnails = false){
+        include_once( ABSPATH . 'wp-admin/includes/image.php' );
+
+        if ($get_only_thumbnails === true){
+    
+            $post_thumbnail_id = get_post_thumbnail_id( $post_id );
+            
+            if (empty($post_thumbnail_id) || $post_thumbnail_id == ""){
+                return [];
+            }
+            
+            $images = [];
+            array_push($images, get_post($post_thumbnail_id));
+            
+        } else {
+        
+            // now get any images attached to the post
+            $args = array(
+                'post_parent' => $post_id,
+                'post_type'   => 'any',
+                'numberposts' => -1,
+                'post_status' => 'any'
+            );
+
+            $images = get_children ( $args );
+        }
+        $images_meta = [];
+        
+    
+        foreach ($images as $image){
+            array_push($images_meta, self::get_image_information($image));
         }
 
         return $images_meta;
