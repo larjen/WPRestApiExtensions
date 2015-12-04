@@ -134,31 +134,17 @@ class WPRestApiExtensions {
 
         //search object
         $searchObj = array(
-            "name" => $WP_REST_Request_arg["tag_name"],
+            "slug" => $WP_REST_Request_arg["tag_name"],
             "number" => 1
         );
 
         $tag = get_tags($searchObj);
 
+        // if no tag found return 404
+        
         if (empty($tag)) {
-
-            // if there is a space in the requested name - try replacing them with '-'
-            // to see if that gives a result
-
-            $newSearchTerm = str_replace(' ', '-', $WP_REST_Request_arg["tag_name"]);
-
-            //search object
-            $searchObj = array(
-                "name" => $newSearchTerm,
-                "number" => 1
-            );
-
-            $tag = get_tags($searchObj);
-
-            if (empty($tag)) {
-                $response["status_code"] = 404;
-                $response["status_message"] = "No such tag.";
-            }
+            $response["status_code"] = 404;
+            $response["status_message"] = "No such tag.";
         }
 
         // remove the filter
